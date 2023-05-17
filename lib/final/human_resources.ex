@@ -8,6 +8,24 @@ defmodule Final.HumanResources do
 
   alias Final.HumanResources.Employee
 
+  def subscribe() do
+    IO.puts "Subscribing to the Employee List"
+    Phoenix.PubSub.subscribe(Final.PubSub, "employees")
+  end
+
+  def broadcast({:ok, employee}, tag) do
+    Phoenix.PubSub.broadcast(
+      Final.PubSub,
+      "employees",
+      {tag, employee}
+    )
+
+    {:ok, employee}
+  end
+
+  def broadcast({:error, _changeset} = error, _tag), do: error
+
+
   @doc """
   Returns the list of employees.
 
@@ -53,6 +71,7 @@ defmodule Final.HumanResources do
     %Employee{}
     |> Employee.changeset(attrs)
     |> Repo.insert()
+    |> broadcast(:employee_created)
   end
 
   @doc """
@@ -71,6 +90,7 @@ defmodule Final.HumanResources do
     employee
     |> Employee.changeset(attrs)
     |> Repo.update()
+    |> broadcast(:employee_updated)
   end
 
   @doc """
@@ -87,6 +107,7 @@ defmodule Final.HumanResources do
   """
   def delete_employee(%Employee{} = employee) do
     Repo.delete(employee)
+    |> broadcast(:employee_deleted)
   end
 
   @doc """

@@ -17,6 +17,8 @@ defmodule FinalWeb.EmployeeController do
   def create(conn, %{"employee" => employee_params}) do
     case HumanResources.create_employee(employee_params) do
       {:ok, employee} ->
+        # send a broadcast to other browsers
+        FinalWeb.Endpoint.broadcast("employee:lobby", "create", %{})
         conn
         |> put_flash(:info, "Employee created successfully.")
         |> redirect(to: ~p"/employees/#{employee}")
@@ -42,6 +44,7 @@ defmodule FinalWeb.EmployeeController do
 
     case HumanResources.update_employee(employee, employee_params) do
       {:ok, employee} ->
+        FinalWeb.Endpoint.broadcast("employee:lobby", "update", %{})
         conn
         |> put_flash(:info, "Employee updated successfully.")
         |> redirect(to: ~p"/employees/#{employee}")
@@ -54,6 +57,7 @@ defmodule FinalWeb.EmployeeController do
   def delete(conn, %{"id" => id}) do
     employee = HumanResources.get_employee!(id)
     {:ok, _employee} = HumanResources.delete_employee(employee)
+    FinalWeb.Endpoint.broadcast("employee:lobby", "delete", %{})
 
     conn
     |> put_flash(:info, "Employee deleted successfully.")

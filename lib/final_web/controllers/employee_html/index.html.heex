@@ -25,3 +25,9 @@
     </.link>
   </:action>
 </.table>
+
+<script>
+  document.addEventListener('employee_created', () => location.reload());
+  document.addEventListener('employee_updated', () => location.reload());
+  document.addEventListener('employee_deleted', () => location.reload());
+</script>
